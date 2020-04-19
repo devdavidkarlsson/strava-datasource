@@ -16,6 +16,7 @@ build-frontend:
 
 build-backend:
 	env GOOS=linux go build -mod=vendor -o ./dist/strava-plugin_linux_amd64 ./pkg
+	env GOOS=linux GOARCH=arm64 go build -mod=vendor -o ./dist/strava-plugin_linux_arm ./pkg
 
 build-debug:
 	env GOOS=linux go build -mod=vendor -gcflags=all="-N -l" -o ./dist/strava-plugin_linux_amd64 ./pkg
@@ -25,6 +26,9 @@ run-backend:
 	bra run
 
 dist: dist-frontend dist-backend
+
+arm-dist: dist-frontend dist-arm-backend-linux
+
 dist-frontend:
 	yarn build
 dist-backend: dist-backend-linux dist-backend-darwin dist-backend-windows
@@ -32,6 +36,10 @@ dist-backend-windows: extension = .exe
 dist-backend-%:
 	$(eval filename = strava-plugin_$*_amd64$(extension))
 	env GOOS=$* GO111MODULE=on GOARCH=amd64 go build -ldflags="-s -w" -mod=vendor -o ./dist/$(filename) ./pkg
+
+dist-arm-backend-linux:
+	$(eval arm_filename = strava-plugin_linux_arm64)
+	env GOOS=linux GO111MODULE=on GOARCH=arm64 go build -ldflags="-s -w" -mod=vendor -o ./dist/strava-plugin_linux_arm ./pkg
 
 start-frontend:
 	yarn start
